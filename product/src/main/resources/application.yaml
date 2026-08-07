@@ -1,14 +1,14 @@
 spring:
   application:
     name: product
-  h2:
-    console:
-      enabled: true
   datasource:
-    url: jdbc:h2:mem:test
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
-    show-sql: true
+    database: POSTGRESQL
+    show-sql: ${SHOW_SQL}
     hibernate:
-      ddl-auto: create
+      ddl-auto: ${DDL_AUTO}
 server:
   port: 8081
