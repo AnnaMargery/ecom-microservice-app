@@ -1,8 +1,7 @@
 package com.ecom.app.product.dto;
 
-import lombok.Data;
-
 import java.math.BigDecimal;
+import lombok.Data;
 
 @Data
 public class ProductRequest {

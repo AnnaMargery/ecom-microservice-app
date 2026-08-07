@@ -3,12 +3,11 @@ package com.ecom.app.product.controller;
 import com.ecom.app.product.dto.ProductRequest;
 import com.ecom.app.product.dto.ProductResponse;
 import com.ecom.app.product.service.ProductService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor

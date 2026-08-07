@@ -1,6 +1,5 @@
 package com.ecom.app.user.dto;
 
-
 import com.ecom.app.user.model.UserRole;
 import lombok.Builder;
 import lombok.Data;
