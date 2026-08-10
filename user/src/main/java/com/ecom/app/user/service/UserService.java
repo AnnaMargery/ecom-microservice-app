@@ -4,11 +4,11 @@ import com.ecom.app.user.dto.UserRequest;
 import com.ecom.app.user.mapper.AddressMapper;
 import com.ecom.app.user.model.User;
 import com.ecom.app.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,12 +25,12 @@ public class UserService {
 		userRepository.save(user);
 	}
 
-	public Optional<User> getUserById(Long id) {
+	public Optional<User> getUserById(String id) {
 		return userRepository.findById(id);
 	}
 
 	@Transactional
-	public boolean updateUser(Long id, UserRequest request) {
+	public boolean updateUser(String id, UserRequest request) {
 		return userRepository.findById(id).map(existingUser -> {
 			User updatedUser = User.builder().id(existingUser.getId()).firstName(request.getFirstName())
 					.lastName(request.getLastName()).email(request.getEmail()).phoneNumber(request.getPhoneNumber())

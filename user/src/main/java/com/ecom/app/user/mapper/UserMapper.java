@@ -13,7 +13,7 @@ public class UserMapper {
 	private final AddressMapper addressMapper;
 
 	public UserResponse mapToUserResponse(User user) {
-		return UserResponse.builder().id(user.getId() != null ? String.valueOf(user.getId()) : null)
+		return UserResponse.builder().id(user.getId() != null ? user.getId(): null)
 				.firstName(user.getFirstName()).lastName(user.getLastName()).role(user.getRole()).email(user.getEmail())
 				.phoneNumber(user.getPhoneNumber())
 				.address(user.getAddress() != null ? addressMapper.mapToAddressDto(user.getAddress()) : null).build();
