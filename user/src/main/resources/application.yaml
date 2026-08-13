@@ -1,8 +1,5 @@
 spring:
   application:
-    name: user- service
-  mongodb:
-    uri: ${MONGODB_URL}
-    database: usersDb
-server:
-  port: 8082
+    name: user-service
+  config:
+    import: optional:configserver:http://localhost:8888
