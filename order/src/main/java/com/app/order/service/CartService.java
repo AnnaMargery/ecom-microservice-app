@@ -1,10 +1,12 @@
 package com.app.order.service;
 
 import com.app.order.client.ProductServiceClient;
+import com.app.order.client.UserServiceClient;
 import com.app.order.dto.CartItemRequest;
 import com.app.order.model.CartItem;
 import com.app.order.repository.CartItemRepository;
 import com.ecom.app.product.dto.ProductResponse;
+import com.ecom.app.user.dto.UserResponse;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,8 +21,7 @@ public class CartService {
 
 	private final CartItemRepository cartItemRepository;
 	private final ProductServiceClient productServiceClient;
-	// private final ProductRepository productRepository;
-	// private final UserRepository userRepository;
+	private final UserServiceClient userServiceClient;
 
 	public boolean addToCart(String userId, CartItemRequest request) {
 		ProductResponse productResponse = productServiceClient.getProductDetails(Long.valueOf(request.getProductId()));
@@ -29,11 +30,9 @@ public class CartService {
 		if (productResponse.getStockQuantity() < request.getQuantity())
 			return false;
 
-		// Optional<User> userOpt = userRepository.findById(Long.valueOf(userId));
-		// if (userOpt.isEmpty())
-		// return false;
-		//
-		// User user = userOpt.get();
+		UserResponse userResponse = userServiceClient.getUserDetails(userId);
+		if (Objects.isNull(userResponse))
+			return false;
 
 		BigDecimal price = BigDecimal.valueOf(109274883);
 		CartItem existingCartItem = cartItemRepository.findByUserIdAndProductId(userId, request.getProductId());

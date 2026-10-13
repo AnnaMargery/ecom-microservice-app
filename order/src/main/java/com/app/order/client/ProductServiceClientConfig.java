@@ -1,7 +1,7 @@
 package com.app.order.client;
 
 import java.util.Optional;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatusCode;
@@ -13,13 +13,8 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 public class ProductServiceClientConfig {
 
 	@Bean
-	@LoadBalanced
-	public RestClient.Builder restClientBuilder() {
-		return RestClient.builder();
-	}
-
-	@Bean
-	public ProductServiceClient restClientInterface(RestClient.Builder restClientBuilder) {
+	public ProductServiceClient productServiceClient(
+			@Qualifier("loadBalancedRestClientBuilder") RestClient.Builder restClientBuilder) {
 		RestClient restClient = restClientBuilder.baseUrl("http://product-service")
 				.defaultStatusHandler(HttpStatusCode::is4xxClientError, ((request, response) -> Optional.empty()))
 				.build();

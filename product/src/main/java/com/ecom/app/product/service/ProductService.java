@@ -8,7 +8,6 @@ import com.ecom.app.product.repository.ProductRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -48,7 +47,7 @@ public class ProductService {
 		return productRepository.searchByKeyword(keyword).stream().map(productMapper::mapToProductResponse).toList();
 	}
 
-    public Optional<ProductResponse> getProductById(Long id) {
-		return productRepository.findByIdAndActiveTrue(id).map(productMapper::mapToProductResponse);
-    }
+	public Optional<ProductResponse> getProductById(Long id) {
+		return productRepository.findByIdAndIsActiveTrue(id).map(productMapper::mapToProductResponse);
+	}
 }
