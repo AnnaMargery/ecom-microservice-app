@@ -6,6 +6,7 @@ import com.ecom.app.user.mapper.UserMapper;
 import com.ecom.app.user.service.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/users")
+@Slf4j
 public class UserController {
 
 	private final UserService userService;
