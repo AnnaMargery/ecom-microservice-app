@@ -1,11 +1,14 @@
 package com.app.order.service;
 
+import com.app.order.client.ProductServiceClient;
 import com.app.order.dto.CartItemRequest;
 import com.app.order.model.CartItem;
 import com.app.order.repository.CartItemRepository;
+import com.ecom.app.product.dto.ProductResponse;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,19 +18,17 @@ import org.springframework.stereotype.Service;
 public class CartService {
 
 	private final CartItemRepository cartItemRepository;
+	private final ProductServiceClient productServiceClient;
 	// private final ProductRepository productRepository;
 	// private final UserRepository userRepository;
 
 	public boolean addToCart(String userId, CartItemRequest request) {
-		// Optional<Product> productOpt =
-		// productRepository.findById(request.getProductId());
-		// if (productOpt.isEmpty())
-		// return false;
-		//
-		// Product product = productOpt.get();
-		// if (product.getStockQuantity() < request.getQuantity())
-		// return false;
-		//
+		ProductResponse productResponse = productServiceClient.getProductDetails(Long.valueOf(request.getProductId()));
+		if (Objects.isNull(productResponse))
+			return false;
+		if (productResponse.getStockQuantity() < request.getQuantity())
+			return false;
+
 		// Optional<User> userOpt = userRepository.findById(Long.valueOf(userId));
 		// if (userOpt.isEmpty())
 		// return false;
