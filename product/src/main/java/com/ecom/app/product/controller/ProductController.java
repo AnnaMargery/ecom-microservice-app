@@ -5,12 +5,14 @@ import com.ecom.app.product.dto.ProductResponse;
 import com.ecom.app.product.service.ProductService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("api/products")
 public class ProductController {
 
@@ -24,6 +26,7 @@ public class ProductController {
 	@PutMapping("/{id}")
 	public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id,
 			@RequestBody ProductRequest productRequest) {
+
 		return productService.updateProduct(id, productRequest).map(ResponseEntity::ok)
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
