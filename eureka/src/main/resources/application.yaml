@@ -1,6 +1,10 @@
 spring:
   application:
     name: eureka
+    servlet:
+      context-path: /eureka
+
+
 server:
   port: 8761
 eureka:
