@@ -1,22 +1,21 @@
 package com.app.order.service;
 
-import static com.app.order.model.Order.*;
-
 import com.app.order.client.UserServiceClient;
 import com.app.order.dto.OrderResponse;
+import com.app.order.dto.UserResponse;
 import com.app.order.mapper.OrderMapper;
 import com.app.order.model.CartItem;
 import com.app.order.model.Order;
 import com.app.order.model.OrderItem;
 import com.app.order.model.OrderStatus;
 import com.app.order.repository.OrderRepository;
-import com.ecom.app.user.dto.UserResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

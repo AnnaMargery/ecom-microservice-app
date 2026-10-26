@@ -1,7 +1,5 @@
 package com.app.order.client;
 
-import static java.util.Objects.*;
-
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.tracing.Tracer;
 import io.micrometer.tracing.propagation.Propagator;
@@ -12,6 +10,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestClient;
+
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 
 @Configuration
 public class RestClientConfig {

@@ -1,6 +1,6 @@
 package com.app.order.client;
 
-import com.ecom.app.product.dto.ProductResponse;
+import com.app.order.dto.ProductResponse;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
