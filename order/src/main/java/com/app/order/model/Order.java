@@ -1,18 +1,19 @@
 package com.app.order.model;
 
-import static com.app.order.model.OrderStatus.*;
-
 import jakarta.persistence.*;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.app.order.model.OrderStatus.PENDING;
 
 @Entity
 @Data

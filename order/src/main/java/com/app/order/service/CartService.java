@@ -3,16 +3,18 @@ package com.app.order.service;
 import com.app.order.client.ProductServiceClient;
 import com.app.order.client.UserServiceClient;
 import com.app.order.dto.CartItemRequest;
+import com.app.order.dto.ProductResponse;
+import com.app.order.dto.UserResponse;
 import com.app.order.model.CartItem;
 import com.app.order.repository.CartItemRepository;
-import com.ecom.app.product.dto.ProductResponse;
-import com.ecom.app.user.dto.UserResponse;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class CartService {
 	private final ProductServiceClient productServiceClient;
 	private final UserServiceClient userServiceClient;
 
+	@CircuitBreaker(name="productService", fallbackMethod = "addToCartFallback")
 	public boolean addToCart(String userId, CartItemRequest request) {
 		ProductResponse productResponse = productServiceClient.getProductDetails(Long.valueOf(request.getProductId()));
 		if (Objects.isNull(productResponse))
@@ -31,7 +34,7 @@ public class CartService {
 			return false;
 
 		UserResponse userResponse = userServiceClient.getUserDetails(userId);
-		if (Objects.isNull(userResponse))
+		if (userResponse == null)
 			return false;
 
 		BigDecimal price = BigDecimal.valueOf(109274883);
@@ -50,6 +53,11 @@ public class CartService {
 			cartItemRepository.save(cartItem);
 		}
 		return true;
+	}
+
+	public boolean addToCartFallback(String userId, CartItemRequest request, Exception exception){
+		exception.getMessage();
+		return false;
 	}
 
 	public boolean deleteItemFromCart(String userId, String productId) {

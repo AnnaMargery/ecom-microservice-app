@@ -1,11 +1,14 @@
 package com.app.order.dto;
 
-import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+
+import java.math.BigDecimal;
 
 @Data
 @AllArgsConstructor
+@Builder
 public class OrderItemDto {
 
 	private Long id;

@@ -9,16 +9,16 @@ import org.springframework.stereotype.Component;
 public class ProductMapper {
 
 	public ProductResponse mapToProductResponse(Product product) {
-		ProductResponse response = new ProductResponse();
-		response.setId(product.getId());
-		response.setName(product.getName());
-		response.setDescription(product.getDescription());
-		response.setPrice(product.getPrice());
-		response.setStockQuantity(product.getStockQuantity());
-		response.setCategory(product.getCategory());
-		response.setImageUrl(product.getImageUrl());
-		response.setActive(product.isActive());
-		return response;
+		return ProductResponse.builder()
+				.id(product.getId())
+				.name(product.getName())
+				.price(product.getPrice())
+				.description(product.getDescription())
+				.imageUrl(product.getImageUrl())
+				.category(product.getCategory())
+				.stockQuantity(product.getStockQuantity())
+				.isActive(product.isActive())
+				.build();
 	}
 
 	public void updateProductFromRequest(Product product, ProductRequest productRequest) {

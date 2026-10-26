@@ -3,8 +3,10 @@ package com.app.order.mapper;
 import com.app.order.dto.OrderItemDto;
 import com.app.order.dto.OrderResponse;
 import com.app.order.model.Order;
-import java.math.BigDecimal;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
 
 @Component
 public class OrderMapper {
