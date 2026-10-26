@@ -41,11 +41,12 @@ public class CartService {
 			existingCartItem.setPrice(price.multiply(BigDecimal.valueOf(existingCartItem.getQuantity())));
 			cartItemRepository.save(existingCartItem);
 		} else {
-			CartItem cartItem = new CartItem();
-			cartItem.setUserId(userId);
-			cartItem.setProductId(request.getProductId());
-			cartItem.setQuantity(request.getQuantity());
-			cartItem.setPrice(price.multiply(BigDecimal.valueOf(request.getQuantity())));
+			CartItem cartItem = CartItem.builder()
+					.userId(userId)
+					.productId(request.getProductId())
+					.quantity(request.getQuantity())
+					.price(price.multiply(BigDecimal.valueOf(request.getQuantity())))
+					.build();
 			cartItemRepository.save(cartItem);
 		}
 		return true;

@@ -13,6 +13,7 @@ import com.app.order.repository.OrderRepository;
 import com.ecom.app.user.dto.UserResponse;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,11 +34,17 @@ public class OrderService {
 		}
 
 		UserResponse userDetails = userServiceClient.getUserDetails(userId);
+		if(Objects.isNull(userDetails)){
+			return Optional.empty();
+		}
+
 		BigDecimal totalPrice = cartItems.stream().map(CartItem::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
-		Order order = new Order();
-		order.setUserId(userDetails.getId());
-		order.setStatus(OrderStatus.CONFIRMED);
-		order.setAmount(totalPrice);
+
+		Order order = Order.builder()
+				.userId(userDetails.getId())
+				.status(OrderStatus.CONFIRMED)
+				.amount(totalPrice)
+				.build();
 
 		List<OrderItem> orderItems = cartItems.stream().map(cartItem -> new OrderItem(null, cartItem.getProductId(),
 				cartItem.getQuantity(), cartItem.getPrice(), order)).toList();
