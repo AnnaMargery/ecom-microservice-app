@@ -10,8 +10,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Data
-@NoArgsConstructor
+@RequiredArgsConstructor
 @Table(name = "cartItems")
+@Builder
+@AllArgsConstructor
 public class CartItem {
 
 	@Id
@@ -25,5 +27,6 @@ public class CartItem {
 	private LocalDateTime createdAt;
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
+
 
 }
