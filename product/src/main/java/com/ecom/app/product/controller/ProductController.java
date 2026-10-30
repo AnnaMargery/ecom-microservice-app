@@ -3,6 +3,7 @@ package com.ecom.app.product.controller;
 import com.ecom.app.product.dto.ProductRequest;
 import com.ecom.app.product.dto.ProductResponse;
 import com.ecom.app.product.service.ProductService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,14 +20,13 @@ public class ProductController {
 	private final ProductService productService;
 
 	@PostMapping
-	public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest productRequest) {
+	public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest productRequest) {
 		return new ResponseEntity<>(productService.createProduct(productRequest), HttpStatus.CREATED);
 	}
 
 	@PutMapping("/{id}")
 	public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id,
-			@RequestBody ProductRequest productRequest) {
-
+			@Valid @RequestBody ProductRequest productRequest) {
 		return productService.updateProduct(id, productRequest).map(ResponseEntity::ok)
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}

@@ -7,6 +7,8 @@ import com.ecom.app.product.model.Product;
 import com.ecom.app.product.repository.ProductRepository;
 import java.util.List;
 import java.util.Optional;
+
+import com.ecom.app.product.validation.ProductRequestValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +18,10 @@ public class ProductService {
 
 	private final ProductRepository productRepository;
 	private final ProductMapper productMapper;
+	private final ProductRequestValidator productRequestValidator;
 
 	public ProductResponse createProduct(ProductRequest productRequest) {
+		productRequestValidator.validate(productRequest);
 		Product product = new Product();
 		productMapper.updateProductFromRequest(product, productRequest);
 		return productMapper.mapToProductResponse(productRepository.save(product));
