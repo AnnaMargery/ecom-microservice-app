@@ -18,7 +18,7 @@ A Java and Spring Boot portfolio project exploring an e-commerce backend built f
 
 ## Architecture
 
-![E-Commerce microservices architecture and observability graph](docs/architecture.svg)
+![E-Commerce microservices architecture and observability graph](https://github.com/AnnaMargery/ecom-microservice-app/wiki/E%E2%80%90Commerce-microservices-architecture-and-observability-graph)
 
 The gateway forwards product, user, order, and cart API paths to services registered with Eureka. It configures circuit-breaker fallbacks for the business services. The Config Server reads service YAML files from configserver/src/main/resources/config/.
 
