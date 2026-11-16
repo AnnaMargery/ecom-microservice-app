@@ -1,52 +1,20 @@
 # E-Commerce Microservices Application
 
-A microservices-based e-commerce application developed as a software engineering portfolio project.
+A Java and Spring Boot portfolio project exploring an e-commerce backend built from independently running services.
 
-The project separates core e-commerce functionality into independent services for user management, product management, and order processing. Its goal is to explore microservices architecture, backend development, API design, and communication between distributed components.
+**Status:** In development. The repository contains user, product, and order services, plus service discovery, centralized configuration, and an API gateway. Some operational configuration is machine-specific; see Known limitations.
 
-**Project status:** 🚧 In Development
----
+## Contents
 
-## Table of Contents
-
-- [Overview](#-overview)
-- [Architecture](#️-architecture)
-- [Microservices](#-microservices)
-- [Technology Stack](#️-technology-stack)
-- [Project Structure](#-project-structure)
-- [Getting Started](#-getting-started)
-- [Configuration](#️-configuration)
-- [API Documentation](#-api-documentation)
-- [Testing](#-testing)
-- [Development Roadmap](#️-development-roadmap)
-- [Learning Objectives](#-learning-objectives)
-
----
-
-## Overview
-
-This project explores how an e-commerce application can be designed using a microservices architecture rather than a traditional monolithic approach.
-
-The application is divided into three core business domains:
-
-- **Users** — user-related functionality.
-- **Products** — product catalog and product-related operations.
-- **Orders** — order creation and order-related operations.
-
-Each service is organized around a specific business responsibility, providing an opportunity to investigate separation of concerns, service boundaries, independent development, and communication between application components.
-
-### Project Goals
-
-- Design an application using microservices architecture.
-- Separate business functionality into independent services.
-- Develop and document backend APIs.
-- Explore communication between services.
-- Implement appropriate data persistence.
-- Practice testing, debugging, and error handling.
-- Apply software engineering best practices.
-- Build a foundation for future containerization and deployment.
-
----
+- Architecture
+- Services and API
+- Technology
+- Prerequisites
+- Local setup
+- Configuration
+- Tests
+- Repository layout
+- Known limitations
 
 ## Architecture
 
@@ -246,219 +214,204 @@ Navigate to the project directory:
 cd ecom-microservice-app
 ```
 
-### 2. Configure the Environment
+The gateway forwards product, user, order, and cart API paths to services registered with Eureka. It configures circuit-breaker fallbacks for the business services. The Config Server reads service YAML files from configserver/src/main/resources/config/.
 
-TODO: Document the environment variables and configuration files required by each service.
+### Observability
 
-Depending on the implementation, configuration may include:
+The repository includes an optional observability stack in additional/evaluate-prometheus/docker-compose.yaml:
 
-- Database connection settings.
-- Service ports.
-- API URLs.
-- Credentials for local development.
-- External service configuration.
-
-Do not commit passwords, API keys, or other secrets to the repository.
-
-### 3. Build the Application
-
-TODO: Add the build commands for the actual technology stack.
-
-If each service has its own build configuration, document the process for building them individually.
-
-### 4. Start the Services
-
-TODO: Document how to start the user, product, and order services.
-
-If the services depend on one another, explain the required startup order and any infrastructure that must be running first.
-
-### 5. Verify the Application
-
-TODO: Add instructions for checking that each service starts successfully.
-
-Include health-check endpoints or example API requests if they are available.
-
----
-
-## Configuration
-
-Configuration instructions will depend on the technologies and infrastructure used by each service.
-
-### Environment Variables
-
-Document required environment variables here.
-
-For example, if applicable:
-
-| Variable | Description | Example |
+| Tool | Purpose | Local address |
 |---|---|---|
-| `SERVER_PORT` | Service listening port | `8080` |
-| `DATABASE_URL` | Database connection URL | TODO |
-| `USER_SERVICE_URL` | User service address | TODO |
-| `PRODUCT_SERVICE_URL` | Product service address | TODO |
+| Prometheus | Scrapes Product, User, and Order metrics from /actuator/prometheus every 3 seconds | http://localhost:9090 |
+| Grafana | Dashboards with Prometheus and Loki data sources provisioned by Compose | http://localhost:3000 |
+| Loki | Stores and serves logs | http://localhost:3100 |
+| Grafana Alloy | Collects Docker container logs and forwards them to Loki | http://localhost:12345 |
+| Zipkin | Receives and displays distributed traces | http://localhost:9411 |
 
-*These are illustrative examples, not confirmed variables in the current implementation.*
+The business services and gateway include Micrometer Prometheus and tracing dependencies. Their configuration samples traces at 100%. Prometheus is configured to scrape the three business services, not the gateway. Alloy reads Docker container logs; it does not collect stdout or log files from services launched directly with Maven.
 
-### Configuration Guidelines
+## Services and API
 
-- Keep environment-specific settings outside application code where appropriate.
-- Never commit credentials or production secrets.
-- Document required environment variables.
-- Provide an example configuration file if needed.
-- Use separate configurations for local development and production where appropriate.
+| Component | Port | Persistence | Responsibility |
+|---|---:|---|---|
+| API Gateway (gateway/) | 8080 | — | Routes client requests and provides fallback responses |
+| Product Service (product/) | 8081 | PostgreSQL | Product creation, listing, search, update, and soft deletion |
+| User Service (user/) | 8082 | MongoDB | User creation, retrieval, listing, and update |
+| Order Service (order/) | 8083 | PostgreSQL | Cart operations and order creation; calls product and user services |
+| Eureka (eureka/) | 8761 | — | Service registry |
+| Config Server (configserver/) | 8888 | — | Serves externalized service configuration |
 
----
-
-## API Documentation
-
-This section will document the APIs exposed by each service.
-
-The endpoints below are placeholders. Replace them with the actual routes implemented in the application.
-
-### User Service
-
-| HTTP Method | Endpoint | Description |
-|---|---|---|
-| TODO | TODO | TODO |
+Business APIs are available through the gateway at http://localhost:8080 and directly on each service port.
 
 ### Product Service
 
-| HTTP Method | Endpoint | Description |
+| Method | Path | Behavior |
 |---|---|---|
-| TODO | TODO | TODO |
+| POST | /api/products | Create a product; returns 201 |
+| GET | /api/products | List active products |
+| GET | /api/products/{id} | Get an active product; returns 404 if absent |
+| GET | /api/products/search?keyword={keyword} | Search products |
+| PUT | /api/products/{id} | Update a product; returns 404 if absent |
+| DELETE | /api/products/{id} | Soft-delete a product; returns 204 or 404 |
+
+Product creation and update require a nonblank name and category and a positive price. Example:
+
+```bash
+curl -i http://localhost:8080/api/products
+```
+
+### User Service
+
+| Method | Path | Behavior |
+|---|---|---|
+| POST | /api/users | Create a user |
+| GET | /api/users | List users |
+| GET | /api/users/{id} | Get a user; returns 404 if absent |
+| PUT | /api/users/{id} | Update a user; returns 404 if absent |
 
 ### Order Service
 
-| HTTP Method | Endpoint | Description |
+All cart routes require the X-User-ID request header.
+
+| Method | Path | Behavior |
 |---|---|---|
-| TODO | TODO | TODO |
+| POST | /api/cart | Add an item to the user's cart; returns 201 or 400 |
+| GET | /api/cart | Fetch the user's cart |
+| DELETE | /api/cart/items/{productId} | Remove an item; returns 204 or 404 |
+| POST | /api/orders | Create an order for the user; requires X-User-ID |
 
-### API Examples
+### Fallbacks and operations
 
-Once the endpoints are implemented, add example requests and responses.
+When a gateway route falls back, the gateway exposes /fallback/products, /fallback/users, or /fallback/orders with a 503 response. Eureka's dashboard is served on port 8761. Actuator endpoints are enabled by service configuration; exact availability depends on the active configuration.
 
-For example:
+## Technology
+
+- Java 17
+- Spring Boot 4.0.7 and Spring Cloud 2025.1.2
+- Spring MVC, Spring Data JPA, Spring Data MongoDB
+- PostgreSQL for product and order data; MongoDB for user data
+- Spring Cloud Gateway, Eureka Discovery, and Config Server
+- Resilience4j circuit breakers and retry configuration
+- RabbitMQ / Spring Cloud Bus configuration
+- Observability: Micrometer, Prometheus, Grafana, Loki, Grafana Alloy, and Zipkin
+- Maven, JUnit 5, Mockito, AssertJ
+
+## Prerequisites
+
+- JDK 17
+- Maven
+- Docker with the Docker Compose plugin
+- MongoDB for the user service; the supplied Compose file does not start MongoDB
+
+## Local setup
+
+### 1. Start infrastructure
+
+From the repository root:
 
 ```bash
-curl -X GET http://localhost:PORT/ENDPOINT
+docker compose up -d postgres rabbitmq
 ```
 
-Replace `PORT` and `ENDPOINT` with the actual service port and API route.
+The Compose file also defines pgAdmin, available at http://localhost:5050 when started with docker compose up -d. Its development defaults are for local use only.
 
-If the project supports OpenAPI or Swagger, link to the API documentation here.
+### Optional: Start observability tools
 
----
+From the repository root, start the separate stack:
 
-## Testing
+```bash
+docker compose -f additional/evaluate-prometheus/docker-compose.yaml up -d
+```
 
-Testing is an important part of building reliable services.
+This starts Prometheus, Grafana, Zipkin, and the Loki logging stack, including Alloy. Open Grafana at http://localhost:3000, Prometheus at http://localhost:9090, and Zipkin at http://localhost:9411. Grafana allows anonymous administrator access in this local stack; do not expose it to an untrusted network. Prometheus scrapes the three application services when they are running and their Actuator metrics endpoints are available. Alloy collects Docker container logs; services run directly with Maven are not Docker containers, so their logs are not collected by this Alloy configuration.
 
-The testing strategy will be documented as the implementation develops.
+### 2. Configure service properties
 
-Potential areas for testing include:
+The Config Server reads service files from configserver/src/main/resources/config/. Set these environment variables in the shell used to launch the services:
 
-### Unit Testing
+```bash
+export SPRING_DATASOURCE_URL='jdbc:postgresql://localhost:5432/ecomdb'
+export SPRING_DATASOURCE_USERNAME='test'
+export SPRING_DATASOURCE_PASSWORD='test'
+export SHOW_SQL='false'
+export DDL_AUTO='update'
+export MONGODB_URL='mongodb://localhost:27017/usersDb'
+```
 
-Test individual components and business logic in isolation.
+These PostgreSQL values match the supplied Compose defaults. Start a local MongoDB instance separately before starting the User Service.
 
-### Integration Testing
+### 3. Build the services
 
-Verify that application components work correctly together, including database operations and external dependencies.
+Each service is a separate Maven project; there is no root Maven aggregator. Order depends on the Product and User artifacts, so install those first:
 
-### API Testing
+```bash
+mvn -f product/pom.xml clean install
+mvn -f user/pom.xml clean install
+mvn -f order/pom.xml clean install
+mvn -f eureka/pom.xml clean package
+mvn -f configserver/pom.xml clean package
+mvn -f gateway/pom.xml clean package
+```
 
-Verify endpoint behavior, request validation, response formats, and error handling.
+### 4. Start the application
 
-### Inter-Service Testing
+Run each command in a separate terminal from the repository root. Start infrastructure and MongoDB first, then Eureka and Config Server, followed by business services and the gateway.
 
-Where services communicate with one another, test their interactions and behavior when a dependency is unavailable.
+```bash
+mvn -f eureka/pom.xml spring-boot:run
+mvn -f configserver/pom.xml spring-boot:run
+mvn -f product/pom.xml spring-boot:run
+mvn -f user/pom.xml spring-boot:run
+mvn -f order/pom.xml spring-boot:run
+mvn -f gateway/pom.xml spring-boot:run
+```
 
-### Running Tests
+Make sure the environment variables from step 2 are available to the relevant service processes. The Config Server currently has an absolute local path in its application.yaml; update it to this checkout's config directory before running elsewhere.
 
-TODO: Add the actual commands used to execute the test suite.
+## Configuration
 
----
+Business services import configuration from http://localhost:8888. Service-specific settings are stored in configserver/src/main/resources/config/.
 
-##  Development Roadmap
+| Variable | Used by | Purpose |
+|---|---|---|
+| SPRING_DATASOURCE_URL | Product, Order | PostgreSQL JDBC URL |
+| SPRING_DATASOURCE_USERNAME | Product, Order | PostgreSQL username |
+| SPRING_DATASOURCE_PASSWORD | Product, Order | PostgreSQL password |
+| SHOW_SQL | Product, Order | Whether Hibernate logs SQL |
+| DDL_AUTO | Product, Order | Hibernate schema-generation mode |
+| MONGODB_URL | User | MongoDB connection URI |
 
-The following roadmap outlines potential development milestones.
+RabbitMQ uses the development guest credentials in service configuration. Keep credentials and production connection strings out of source control.
 
-Update the checkboxes as features are implemented.
+## Tests
 
-### Core Functionality
+Run a service's tests from the repository root:
 
-- [ ] Implement user-related functionality.
-- [ ] Implement product management functionality.
-- [ ] Implement order management functionality.
-- [ ] Define API contracts for each service.
-- [ ] Add request validation.
-- [ ] Implement consistent error handling.
+```bash
+mvn -f product/pom.xml test
+mvn -f user/pom.xml test
+mvn -f order/pom.xml test
+```
 
-### Microservices Architecture
+Current test sources include service and mapper tests for Product and Order, and mapper tests for User. Controller-level tests are still being added. A focused controller test should use WebMvcTest with MockMvc and a mocked service; use SpringBootTest for tests that need the full application context or real infrastructure.
 
-- [ ] Define service boundaries and responsibilities.
-- [ ] Implement communication between services.
-- [ ] Establish clear ownership of data.
-- [ ] Address data consistency across services.
-- [ ] Document service dependencies.
+## Repository layout
 
-### Quality and Reliability
+```text
+ecom-microservice-app/
+├── configserver/       # Config Server and per-service configuration
+├── eureka/             # Service registry
+├── gateway/            # API Gateway and fallback endpoints
+├── order/              # Cart and order service
+├── product/            # Product catalog service
+├── user/               # User service
+├── additional/          # Monitoring evaluation resources
+├── docker-compose.yml  # Local PostgreSQL, pgAdmin, and RabbitMQ
+└── README.md
+```
 
-- [ ] Add unit tests.
-- [ ] Add integration tests.
-- [ ] Add API tests.
-- [ ] Improve logging and diagnostics.
-- [ ] Add health checks where appropriate.
-- [ ] Document failure-handling behavior.
+## Known limitations
 
-### DevOps and Deployment
-
-- [ ] Add Dockerfiles where appropriate.
-- [ ] Configure local development with Docker Compose.
-- [ ] Add automated builds and tests using CI/CD.
-- [ ] Document deployment requirements.
-- [ ] Explore application monitoring.
-
-*This roadmap describes possible future improvements, not a list of features that are already available.*
-
----
-
-## Learning Objectives
-
-This project provides an opportunity to develop practical experience with backend development and distributed application design.
-
-The main learning areas include:
-
-- **Microservices architecture** — understanding how to divide an application into independent business services.
-- **API design** — defining clear interfaces and consistent request and response formats.
-- **Service communication** — exploring how independent components interact.
-- **Data management** — understanding persistence and data consistency.
-- **Testing** — validating business logic, APIs, and service integration.
-- **Error handling** — designing predictable behavior for invalid requests and failed dependencies.
-- **DevOps practices** — exploring containerization, automation, and deployment.
-- **Documentation** — communicating architectural decisions and implementation details clearly.
-
----
-
-## Future Improvements
-
-As the application develops, potential enhancements include:
-
-- API documentation using OpenAPI or Swagger.
-- Containerized local development.
-- Automated testing and continuous integration.
-- Improved observability and structured logging.
-- Service health checks.
-- Centralized configuration where appropriate.
-- Authentication and authorization, if required.
-- Improved resilience and failure handling.
-- Deployment to a cloud environment.
-
-The final scope will depend on the project's requirements and implementation.
-
----
-
-GitHub: [@AnnaMargery](https://github.com/AnnaMargery)
-Explore my other projects on [GitHub](https://github.com/AnnaMargery).
-
----
+- The Config Server uses a machine-specific absolute path for its native configuration directory. Update it for your checkout before starting the application elsewhere.
+- The supplied Compose file starts PostgreSQL, pgAdmin, and RabbitMQ, but not MongoDB.
+- The project is in development; API behavior, service configuration, and test coverage may change.
