@@ -1,7 +1,6 @@
 package com.ecom.app.product.dto;
 
 import java.math.BigDecimal;
-
 import lombok.Builder;
 import lombok.Data;
 
