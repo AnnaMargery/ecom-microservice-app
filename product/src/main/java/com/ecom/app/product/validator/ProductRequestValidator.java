@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductRequestValidator {
 
-    	public void validateProductRequest(ProductRequest request) {
+	public void validateProductRequest(ProductRequest request) {
 		if (request.getName() == null || request.getName().isBlank()) {
 			throw new IllegalArgumentException("Product name is required");
 		}
