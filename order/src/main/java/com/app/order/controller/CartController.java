@@ -3,6 +3,7 @@ package com.app.order.controller;
 import com.app.order.dto.CartItemRequest;
 import com.app.order.model.CartItem;
 import com.app.order.service.CartService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class CartController {
 
 	@PostMapping
 	private ResponseEntity<String> addToCart(@RequestHeader("X-User-ID") String userId,
-			@RequestBody CartItemRequest request) {
+			@Valid @RequestBody CartItemRequest request) {
 		if (!cartService.addToCart(userId, request)) {
 			return ResponseEntity.badRequest().body("Product out of stock or User not found or Product not found");
 		}
