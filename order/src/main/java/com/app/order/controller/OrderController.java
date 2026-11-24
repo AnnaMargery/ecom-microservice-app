@@ -2,6 +2,7 @@ package com.app.order.controller;
 
 import com.app.order.dto.OrderResponse;
 import com.app.order.service.OrderService;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ public class OrderController {
 	private final OrderService orderService;
 
 	@PostMapping
-	public ResponseEntity<OrderResponse> createOrder(@RequestHeader("X-User-ID") String userId) {
+	public ResponseEntity<OrderResponse> createOrder(@RequestHeader("X-User-ID") @NotBlank String userId) {
 		log.info("Creating an order for user: {}", userId);
 		return orderService.createOrder(userId)
 				.map(orderResponse -> new ResponseEntity<>(orderResponse, HttpStatus.CREATED))
