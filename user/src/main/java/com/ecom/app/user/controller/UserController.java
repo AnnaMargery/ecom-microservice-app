@@ -4,7 +4,10 @@ import com.ecom.app.user.dto.UserRequest;
 import com.ecom.app.user.dto.UserResponse;
 import com.ecom.app.user.mapper.UserMapper;
 import com.ecom.app.user.service.UserService;
+import jakarta.validation.Valid;
 import java.util.List;
+
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,19 +29,19 @@ public class UserController {
 	}
 
 	@PostMapping()
-	public ResponseEntity<String> createUser(@RequestBody UserRequest user) {
+	public ResponseEntity<String> createUser(@Valid @RequestBody UserRequest user) {
 		userService.addUser(userMapper.mapFromUserRequest(user));
-		return new ResponseEntity<>("User added successfully", HttpStatus.OK);
+		return new ResponseEntity<>("User added successfully", HttpStatus.CREATED);
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<UserResponse> getUser(@PathVariable String id) {
+	public ResponseEntity<UserResponse> getUser(@NotBlank @PathVariable String id) {
 		return userService.getUserById(id).map(userMapper::mapToUserResponse).map(ResponseEntity::ok)
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<String> updateUser(@PathVariable String id, @RequestBody UserRequest updatedUser) {
+	public ResponseEntity<String> updateUser(@NotBlank @PathVariable String id, @Valid @RequestBody UserRequest updatedUser) {
 		boolean updated = userService.updateUser(id, updatedUser);
 		return updated ? ResponseEntity.ok("User updated successfully") : ResponseEntity.notFound().build();
 	}

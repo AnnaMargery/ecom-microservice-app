@@ -1,7 +1,6 @@
 package com.ecom.app.product.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 import com.ecom.app.product.dto.ProductRequest;
@@ -9,9 +8,6 @@ import com.ecom.app.product.dto.ProductResponse;
 import com.ecom.app.product.mapper.ProductMapper;
 import com.ecom.app.product.model.Product;
 import com.ecom.app.product.repository.ProductRepository;
-import com.ecom.app.product.validation.ProductRequestValidator;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validation;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -34,13 +30,11 @@ class ProductServiceTest {
 	private ProductRepository productRepository;
 	@Mock
 	private ProductMapper productMapper;
-	private final ProductRequestValidator productRequestValidator = new ProductRequestValidator(
-			Validation.buildDefaultValidatorFactory().getValidator());
 	private ProductService productService;
 
 	@BeforeEach
 	void setUp() {
-		productService = new ProductService(productRepository, productMapper, productRequestValidator);
+		productService = new ProductService(productRepository, productMapper);
 	}
 
 	private final Long PRODUCT_ID = 1L;
@@ -61,56 +55,6 @@ class ProductServiceTest {
 		assertProductResponseEqualsRequest(actualResponse, request, PRODUCT_ID);
 		verify(productRepository).save(Mockito.any(Product.class));
 		verify(productMapper).mapToProductResponse(savedProduct);
-	}
-
-	@Test
-	void shouldNotCreateInvalidProduct() {
-		// Given - request with invalid data: null name, negative price, null category
-		ProductRequest invalidRequest = ProductRequest.builder().name(null).description(PRODUCT_DESCRIPTION)
-				.category(PRODUCT_CATEGORY).price(PRODUCT_PRICE).stockQuantity(STOCK_QUANTITY).imageUrl(PRODUCT_URL)
-				.build();
-
-		// When & Then - service should reject invalid data with validation error
-		assertThatThrownBy(() -> productService.createProduct(invalidRequest))
-				.isInstanceOf(ConstraintViolationException.class).hasMessageContaining("Product name is required");
-
-		// Verify that repository and mapper were never called
-		verify(productRepository, never()).save(any(Product.class));
-		verify(productMapper, never()).mapToProductResponse(any());
-	}
-
-	@Test
-	void shouldNotCreateProductWithoutCategory() {
-		ProductRequest invalidRequest = mockProductRequest();
-		invalidRequest.setCategory(" ");
-
-		assertThatThrownBy(() -> productService.createProduct(invalidRequest))
-				.isInstanceOf(ConstraintViolationException.class).hasMessageContaining("Category is required");
-
-		verifyNoInteractions(productRepository, productMapper);
-	}
-
-	@Test
-	void shouldNotCreateProductWithNonPositivePrice() {
-		ProductRequest invalidRequest = mockProductRequest();
-		invalidRequest.setPrice(BigDecimal.ZERO);
-
-		assertThatThrownBy(() -> productService.createProduct(invalidRequest))
-				.isInstanceOf(ConstraintViolationException.class).hasMessageContaining("Price must be greater than 0");
-
-		verifyNoInteractions(productRepository, productMapper);
-	}
-
-	@Test
-	void shouldNotCreateProductWithNegativeStockQuantity() {
-		ProductRequest invalidRequest = mockProductRequest();
-		invalidRequest.setStockQuantity(-1);
-
-		assertThatThrownBy(() -> productService.createProduct(invalidRequest))
-				.isInstanceOf(ConstraintViolationException.class)
-				.hasMessageContaining("Stock quantity cannot be negative");
-
-		verifyNoInteractions(productRepository, productMapper);
 	}
 
 	@Test
