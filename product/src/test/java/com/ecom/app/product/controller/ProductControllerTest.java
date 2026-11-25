@@ -85,6 +85,17 @@ class ProductControllerTest {
 	}
 
 	@Test
+	void shouldNotUpdateInvalidProduct() throws Exception {
+		ProductRequest invalidRequest = ProductRequest.builder().name("").price(new BigDecimal("-1.00"))
+				.stockQuantity(-1).category("").build();
+
+		mockMvc.perform(put("/api/products/1").contentType("application/json")
+				.content(objectMapper.writeValueAsString(invalidRequest))).andExpect(status().isBadRequest());
+
+		verifyNoInteractions(productService);
+	}
+
+	@Test
 	void shouldGetAllProducts() throws Exception {
 		List<ProductResponse> productResponses = mockSampleProducts();
 		given(productService.getAllProducts()).willReturn(productResponses);
